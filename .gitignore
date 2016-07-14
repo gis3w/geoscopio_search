@@ -1,0 +1,7 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+# Python bytecode
+*.py[co]
+
+# PyCharms project file
+/.idea/
