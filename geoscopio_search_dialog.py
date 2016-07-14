@@ -24,6 +24,7 @@
 import os
 
 from PyQt4 import QtGui, uic, QtCore
+from components.webpage import WebPage
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'geoscopio_search_dialog_base.ui'))
@@ -43,6 +44,7 @@ class GeoscopioSearchDialog(QtGui.QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        self.WEB.setPage(WebPage())
 
     def resizeEvent(self, event):
         self.resized_ev.emit(1)

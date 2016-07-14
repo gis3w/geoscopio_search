@@ -190,7 +190,8 @@ class GeoscopioSearch:
         url = QUrl(GEOSCOPIO_PAGE_URL)
         if self.dlg.WEB.url() != url:
             self.dlg.WEB.loadFinished.connect(self.connect_qgis_js)
-            self.dlg.WEB.load(url)
+            self.dlg.WEB.setUrl(url)
+            #self.dlg.WEB.load(url)
 
         # show the dialog
         self.dlg.show()
@@ -200,4 +201,3 @@ class GeoscopioSearch:
 
     def on_resize_dialog(self):
         self.dlg.WEB.resize(self.dlg.size().width(), self.dlg.size().height())
-        
