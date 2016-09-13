@@ -2,8 +2,11 @@
 """
 /***************************************************************************
  GeoscopioSearch
-                                 A QGIS plugin
- desc
+
+ This plugin is for Geoscopio users, searching on a Geoscopio form search,
+ the results can be added to qgis canvas map. Geoscopio is a service of Regione Toscana (Italy authority)
+ http://www.regione.toscana.it/-/geoscopio
+
                               -------------------
         begin                : 2016-07-14
         git sha              : $Format:%H$
@@ -90,18 +93,16 @@ class GeoscopioSearch:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('GeoscopioSearch', message)
 
-
-    def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+    def add_action(self,
+                   icon_path,
+                   text,
+                   callback,
+                   enabled_flag=True,
+                   add_to_menu=True,
+                   add_to_toolbar=True,
+                   status_tip=None,
+                   whats_this=None,
+                   parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource

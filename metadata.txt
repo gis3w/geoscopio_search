@@ -3,7 +3,7 @@ name=Geoscopio Search
 qgisMinimumVersion=2.0
 description=desc
 version=0.1
-author=Walter lorenzetti GIS3W
+author=Walter lorenzetti (GIS3W)
 email=lorenzetti@gis3w.it
 
 about=This plugin is for Geoscopio users, searching on a Geoscopio form search, the results can be added to qgis canvas map. Geoscopio is a service of Regione Toscana (Italy authority) http://www.regione.toscana.it/-/geoscopio
@@ -11,9 +11,7 @@ about=This plugin is for Geoscopio users, searching on a Geoscopio form search, 
 tracker=https://github.com/gis3w/geoscopio_search/issues
 repository=https://github.com/gis3w/geoscopio_search
 
-# changelog=
-
-tags=Geoscopio, jstoqgis
+tags=geoscopio, jstoqgis, web, webservices
 
 homepage=https://github.com/gis3w/geoscopio_search
 category=Web

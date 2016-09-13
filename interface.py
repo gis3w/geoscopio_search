@@ -1,8 +1,9 @@
 """
 /***************************************************************************
- JsToQgis
-                                 A QGIS plugin
- Porting qgis function to javascript and vice versa
+ JsToQgis interface
+
+Porting qgis function to javascript and vice versa
+
                               -------------------
         begin                : 2014-06-27
         copyright            : (C) 2014-2016 by Walter Lorenzetti - Gis3W
@@ -20,8 +21,7 @@
 """
 
 import PyQt4
-from PyQt4.QtCore import QVariant,QObject,pyqtSlot, pyqtRemoveInputHook
-from PyQt4.QtGui import QColor
+from PyQt4.QtCore import QVariant, QObject, pyqtSlot
 from qgis.core import *
 from qgis.gui import *
 import json
@@ -44,63 +44,63 @@ TYPE_MAP = {
 
 debug = True
 
-def logQgisConsole(msg,force=False):
+
+def logQgisConsole(msg, force=False):
     if debug == True or force:
-        QgsMessageLog.logMessage(msg,"Debug JSTOQGIS")
+        QgsMessageLog.logMessage(msg, "Debug JSTOQGIS")
 
 
 class JsToQgis_Interface(QObject):
-    
+
     interchange = {}
     errormessages = {}
-    
-    def __init__(self,parent=None):
+
+    def __init__(self, parent=None):
+
         super(JsToQgis_Interface, self).__init__(parent)
         self.iface = parent
-        self.mapCanvas = self.iface.mapCanvas() 
-    
+        self.mapCanvas = self.iface.mapCanvas()
+
     @pyqtSlot(str, result=str)
     def getErrorMessages(self, method):
-        '''
+        """
         Return error message from self.errormessages dict
-        '''
+        """
         if method in self.errormessages.keys():
-            toRet = json.dumps(self.errormessages[method]);
+            toRet = json.dumps(self.errormessages[method])
         else:
-            toRet =  "[\"No error message for method '%s'\"]" % method
+            toRet = "[\"No error message for method '%s'\"]" % method
         return toRet
-        
+
     def setErrorMessages(self, method, error):
-        '''
+        """
         Set error message for a method
-        '''
+        """
         if method not in self.errormessages.keys():
             self.errormessages[method] = []
-        
+
         self.errormessages[method].append(error)
-        
+
     @pyqtSlot(result=str)
     def getQgisVersion(self):
-        '''
+        """
         Return current Qgis Version
-        '''
-        return QGis.QGIS_VERSION;
-    
+        """
+        return QGis.QGIS_VERSION
+
     @pyqtSlot(result=str)
     def getLayersData(self):
-        '''
+        """
         Return data from current QGIS registry layers
-        '''
+        """
         qmlr = QgsMapLayerRegistry.instance()
         res = []
         print qmlr.mapLayers().items()
-        for id,l in qmlr.mapLayers().items():
-          
+        for id, l in qmlr.mapLayers().items():
             lObj = {}
             lObj['id'] = id
             lObj['name'] = l.name()
             lObj['originalName'] = l.originalName()
-            
             lObj['source'] = l.source()
             lObj['type'] = l.type()
             lObj['provider'] = l.providerType()
@@ -114,10 +114,9 @@ class JsToQgis_Interface(QObject):
                 lObj['format'] = uri.param('format')
                 lObj['crs'] = uri.param('crs')
             elif lObj['provider'] == 'WFS':
-                
                 up = urlparse.parse_qsl(lObj['source'])
                 cont = 0
-                for i,t in up:
+                for i, t in up:
                     if cont == 0:
                         lObj['url'] = i+'='+t
                     else:
@@ -126,7 +125,7 @@ class JsToQgis_Interface(QObject):
             else:
                 pass
             ext = l.extent()
-            lObj['extent'] = [ext.xMinimum(),ext.yMinimum(),ext.xMaximum(),ext.yMaximum()]
+            lObj['extent'] = [ext.xMinimum(), ext.yMinimum(), ext.xMaximum(), ext.yMaximum()]
             res.append(lObj)
         return json.dumps(res)
 
@@ -155,128 +154,128 @@ class JsToQgis_Interface(QObject):
         else:
             self.setErrorMessages('getLayer', 'Error to export to GeoJSON:{}'.format(error))
             return False
-        
+
     @pyqtSlot(str, str, str)
     def setInterChange(self, field, type, value):
-        '''
+        """
         A private method for to pass data from QGIS to Js
-        '''
-        logQgisConsole(' '.join([field,type,value]),True)
+        """
+        logQgisConsole(' '.join([field,type,value]), True)
+
         def integer(value):
-           return int(value)
+            return int(value)
+
         def string(value):
-           return str(value)
+            return str(value)
+
         def jsoner(value):
-           return json.loads(value)
+            return json.loads(value)
         
-        switch = {
-                   'int':integer,
-                   'str': string,
-                   'json': jsoner
-                   }
+        switch = {'int': integer,
+                  'str': string,
+                  'json': jsoner}
        
         self.interchange[field] = switch[type](value)
-        
-        
+
     @pyqtSlot(float, float, float, float, str)
     def zoomToExtent(self, minx, miny, maxx, maxy, epsg):
-        '''
+        """
         Set extent of qgis map view
-        '''
-        print 'passa'
-        if(not self.mapCanvas):
+        """
+
+        if not self.mapCanvas:
             print self.iface
             return
         
-        jsCrs = QgsCoordinateReferenceSystem(int(epsg),QgsCoordinateReferenceSystem.EpsgCrsId)
+        jsCrs = QgsCoordinateReferenceSystem(int(epsg), QgsCoordinateReferenceSystem.EpsgCrsId)
         QgisCrs = self.mapCanvas.mapSettings().destinationCrs()
         xform = QgsCoordinateTransform(jsCrs, QgisCrs)
         
         logQgisConsole('minx: ' + str(minx) + '| miny: ' + str(miny) + '| maxx: ' + str(maxx) + '| maxy: ' + str(maxy))
         logQgisConsole(str(type(self.mapCanvas)))
-        self.mapCanvas.setExtent(xform.transformBoundingBox(QgsRectangle (minx, miny, maxx, maxy)))
+        self.mapCanvas.setExtent(xform.transformBoundingBox(QgsRectangle(minx, miny, maxx, maxy)))
         self.mapCanvas.refresh()
-        
+
     @pyqtSlot(float, float, float, str)
     def zoomToPoint(self, x, y, scale, epsg):
-        '''
+        """
         Set the center to the map to x,y value and to scale value
-        '''
-        if(not self.mapCanvas):
+        """
+        if not self.mapCanvas:
             print self.iface
             return
         
-        jsCrs = QgsCoordinateReferenceSystem(int(epsg),QgsCoordinateReferenceSystem.EpsgCrsId)
+        jsCrs = QgsCoordinateReferenceSystem(int(epsg), QgsCoordinateReferenceSystem.EpsgCrsId)
         QgisCrs = self.mapCanvas.mapSettings().destinationCrs()
         xform = QgsCoordinateTransform(jsCrs, QgisCrs)
         
-        center = QgsPoint(x,y)
+        center = QgsPoint(x, y)
         center = xform.transform(center)
         
         ct = self.mapCanvas.getCoordinateTransform()
-        x,y = map(int,list(ct.transform(center.x(),center.y())))
+        x, y = map(int, list(ct.transform(center.x(), center.y())))
         
         logQgisConsole('ZoomToPoint: x = '+str(x)+'| y = '+str(y))
 
-        self.mapCanvas.zoomWithCenter(x,y,False)
+        self.mapCanvas.zoomWithCenter(x, y, False)
         self.mapCanvas.zoomScale(scale)
         #self.mapCanvas.refresh()
-        
+
     @pyqtSlot(float)
     def zoomToScale(self, scale):
         self.mapCanvas.zoomScale(scale)
-        
+
     @pyqtSlot()
     def zoomIn(self):
-        '''
+        """
         Execute simple ZoomIn of Qgis API
-        '''
-        if(not self.mapCanvas):
+        """
+        if not self.mapCanvas:
             print self.iface
             return None
         self.mapCanvas.zoomIn()
-        
+
     @pyqtSlot()
     def zoomOut(self):
-        '''
+        """
         Execute simple ZoomOut of Qgis API
-        '''
-        if(not self.mapCanvas):
+        """
+        if not self.mapCanvas:
             print self.iface
             return
         self.mapCanvas.zoomOut()
-        
+
     @pyqtSlot(result=str)
     def getCRS(self):
-        '''
+        """
         Return current QGIS CRS
-        '''
+        """
         return self.mapCanvas.mapSettings().destinationCrs().authid()
-    
+
     @pyqtSlot(result=float)
     def getCurrentScale(self):
-        '''
+        """
         Return current QGIS Map Scale
-        '''
+        """
         return self.mapCanvas.scale()
-    
+
     @pyqtSlot(float)
-    def setScale(self,scale):
-        '''
+    def setScale(self, scale):
+        """
         Set the QGIS Map scale value
-        '''
+        """
         return self.mapCanvas.zoomScale(scale)
 
     @pyqtSlot(str)
     def setCRS(self, epsg):
-        '''
+        """
         Set QGIS current CRS and try to reproject all layers on map
-        '''
+        """
 
         #if not self.mapCanvas.hasCrsTransformEnabled():
             #self.mapCanvas.mapSettings().setProjectionsEnabled(True)
         # check if current espg map is different from those submit
-        crs = QgsCoordinateReferenceSystem(int(epsg),QgsCoordinateReferenceSystem.EpsgCrsId)
+        crs = QgsCoordinateReferenceSystem(int(epsg), QgsCoordinateReferenceSystem.EpsgCrsId)
         
         #mapSettings = self.mapCanvas.mapSettings()
         #mapSettings.setDestinationCrs(crs)
@@ -285,16 +284,14 @@ class JsToQgis_Interface(QObject):
         self.mapCanvas.setDestinationCrs(crs)
 
         self.mapCanvas.refresh()
-        
+
     @pyqtSlot(str, str, str, str, str, str)
-    def addWMSLayer(self,legendName,url,layers,format='image/png',crs=None,style=''):
-        '''
+    def addWMSLayer(self, legendName, url, layers, format='image/png', crs=None, style=''):
+        """
         Add a WMS layer to QGIS Map registry and show on map
-        '''
-        
+        """
         if not crs:
             crs = self.getCRS()
-        
         uri = QgsDataSourceURI()
         uri.setParam("url", url)
         uri.setParamList("layers", layers.split(','))
@@ -303,29 +300,28 @@ class JsToQgis_Interface(QObject):
         uri.setParam("styles", style)
     
         logQgisConsole(str(uri.encodedUri()))
-        
-        
-        WMS = QgsRasterLayer(str(uri.encodedUri()),legendName,'wms')
+
+        WMS = QgsRasterLayer(str(uri.encodedUri()), legendName, 'wms')
         if not WMS.isValid():
-            logQgisConsole("Layer failed to load!",True)
-            logQgisConsole(WMS.error().summary(),True)
-            self.setErrorMessages('addWMSLayer', 'Layer failed to load: '+ WMS.error().summary())
+            logQgisConsole("Layer failed to load!", True)
+            logQgisConsole(WMS.error().summary(), True)
+            self.setErrorMessages('addWMSLayer', 'Layer failed to load: ' + WMS.error().summary())
             return False
         QgsMapLayerRegistry.instance().addMapLayer(WMS)
         return True
-    
+
     @pyqtSlot(float, float, str, str, result=str)
     def identifyLayer(self, lon, lat, epsg, layerId):
-        '''
+        """
         Execute a simple indentify point action on layerId(QGIS) passed and return results of operation
-        '''
+        """
         # activation layer
         
-        jsCrs = QgsCoordinateReferenceSystem(int(epsg),QgsCoordinateReferenceSystem.EpsgCrsId)
+        jsCrs = QgsCoordinateReferenceSystem(int(epsg), QgsCoordinateReferenceSystem.EpsgCrsId)
         QgisCrs = self.mapCanvas.mapSettings().destinationCrs()
         xform = QgsCoordinateTransform(jsCrs, QgisCrs)
         
-        point = QgsPoint(lon,lat)
+        point = QgsPoint(lon, lat)
         point = xform.transform(point)
        
         mapLayer = QgsMapLayerRegistry.instance().mapLayer(layerId)
@@ -333,19 +329,17 @@ class JsToQgis_Interface(QObject):
         ci = QgsMapToolIdentify(self.mapCanvas)
         ci.activate()
         
-        logQgisConsole('IdentifyLayer '+' X='+ str(point.x()) +'Y='+str(point.y()) )
+        logQgisConsole('IdentifyLayer ' + ' X=' + str(point.x()) + 'Y=' + str(point.y()))
         
         #transform lon lat to x,y mousepofition
         ct = self.mapCanvas.getCoordinateTransform()
-        x,y = map(int,list(ct.transform(point.x(),point.y())))
+        x, y = map(int, list(ct.transform(point.x(), point.y())))
         
-        results = ci.identify(x, y,[mapLayer])        
+        results = ci.identify(x, y, [mapLayer])
         ci.deactivate()
         if not results:
             return '[]'
-        
-        print results;
-        
+
         res = []
         for r in results:
             lObj = {}
@@ -355,29 +349,29 @@ class JsToQgis_Interface(QObject):
             attrs = r.mFeature.attributes()
             fields = r.mFeature.fields()
             properties = {}
-            for idx,fld in enumerate(fields.toList()):
+            for idx, fld in enumerate(fields.toList()):
                 value = attrs[idx]
-                if type(attrs[idx]) == PyQt4.QtCore.QPyNullVariant :
+                if type(attrs[idx]) == PyQt4.QtCore.QPyNullVariant:
                     value = None
                 properties[fld.name()] = value
             lObj['mFeature']['properties'] = properties
             lObj['mAttributes'] = r.mAttributes
-            logQgisConsole(str(x)+' '+str(y))
+            logQgisConsole(str(x) + ' ' + str(y))
             res.append(lObj)
         return json.dumps(res)
-    
+
     @pyqtSlot(str, str, str, str, bool, result=str)
     def addWKTLayer(self, WKT, legendName, epsg, fields, originalcrs=True):
-        '''
+        """
         Build a Vector layer from WKT string and adds it to the map canvas
-        '''
+        """
 
         # strip html tags
         legendName = remove_tags(legendName)
 
         # build the geometry
         geom = QgsGeometry.fromWkt(WKT)
-        if not isinstance(geom,QgsGeometry):
+        if not isinstance(geom, QgsGeometry):
             self.setErrorMessages('addWKTLayer', 'Check WKT string, probably is not correct!')
             return False
 
@@ -387,9 +381,10 @@ class JsToQgis_Interface(QObject):
             trasform = QgsCoordinateTransform(QgsCoordinateReferenceSystem(int(epsg[5:])), currentCrs)
             geom.transform(trasform)
             epsg = str(currentCrs.authid())
+
         # check the type
         geomType = geom.type()
-        if geomType in (QGis.UnknownGeometry,QGis.NoGeometry):
+        if geomType in (QGis.UnknownGeometry, QGis.NoGeometry):
             self.setErrorMessages('addWKTLayer', 'Qgis said that your WKT is not a valid geometry or is a Unknown geometry')
             return False
         
@@ -399,7 +394,7 @@ class JsToQgis_Interface(QObject):
         fieldsAttr = json.loads(fields) 
         
         fieldsAttrList = []
-        for k,v in fieldsAttr.items():
+        for k, v in fieldsAttr.items():
             if type(v) == str or type(v) == unicode:
                 fieldsAttrList.append(k + ':string')
             elif type(v) == float:
@@ -414,7 +409,7 @@ class JsToQgis_Interface(QObject):
         seg = QgsFeature()
         layerFields = pr.fields()
         seg.setFields(layerFields)
-        for k,v in fieldsAttr.items():
+        for k, v in fieldsAttr.items():
             seg.setAttribute(k, v)
         seg.setGeometry(geom)
         pr.addFeatures([seg])
@@ -422,16 +417,15 @@ class JsToQgis_Interface(QObject):
 
         QgsMapLayerRegistry.instance().addMapLayers([VLayer])
         return VLayer.id()
-        
 
 
 class QgisToJs_interface(QObject):
     
-    def __init__(self,iface,webview):
+    def __init__(self, iface, webview):
         super(QgisToJs_interface, self).__init__(iface)
         self.iface = iface
         self.webview = webview
-        
+
     @pyqtSlot()
     def ZoomToExtent(self):
         ext = self.iface.mapCanvas().extent()
@@ -439,7 +433,7 @@ class QgisToJs_interface(QObject):
         cmd = "QJ.ZoomToExtent(" + extent + ")"
         self.webview.WEB.page().mainFrame().evaluateJavaScript(cmd)
         logQgisConsole("EXEC QgisToJs::ZoomToExtent")
-        
+
     @pyqtSlot()
     def ZoomToPoint(self):
         ext = self.iface.mapCanvas().extent()
@@ -447,30 +441,28 @@ class QgisToJs_interface(QObject):
         cmd = "QJ.ZoomToExtent(" + extent + ")"
         self.webview.WEB.page().mainFrame().evaluateJavaScript(cmd)
         logQgisConsole("EXEC QgisToJs::ZoomToExtent")
-       
+
     @pyqtSlot() 
     def GetLayersData(self):
         cmd = "QJ.GetLayersData()"
         self.webview.WEB.page().mainFrame().evaluateJavaScript(cmd)
         logQgisConsole("EXEC QgisToJs::GetLayersData")
-        
+
     @pyqtSlot() 
     def GetExtent(self):
         cmd = "QJ.GetExtent()"
         self.webview.WEB.page().mainFrame().evaluateJavaScript(cmd)
         logQgisConsole("EXEC QgisToJs::GeExtent")
-        
+
     @pyqtSlot() 
     def ZoomIn(self):
         cmd = "QJ.ZoomIn()"
         self.webview.WEB.page().mainFrame().evaluateJavaScript(cmd)
         logQgisConsole("EXEC QgisToJs::ZoomIn")
-        
+
     @pyqtSlot() 
     def ZoomOut(self):
         cmd = "QJ.ZoomOut()"
         self.webview.WEB.page().mainFrame().evaluateJavaScript(cmd)
         logQgisConsole("EXEC QgisToJs::ZoomOut")
-        
-        
-        #self.webviewtest.WEB.page().mainFrame().evaluateJavaScript("QJ.ZoomToExtent(" + extent + ")")
+        # self.webviewtest.WEB.page().mainFrame().evaluateJavaScript("QJ.ZoomToExtent(" + extent + ")")
