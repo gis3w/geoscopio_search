@@ -1,6 +1,6 @@
 [general]
 name=Geoscopio Search
-qgisMinimumVersion=2.0
+qgisMinimumVersion=2.12
 description=desc
 version=0.1
 author=Walter lorenzetti (GIS3W)
