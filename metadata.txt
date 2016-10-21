@@ -1,7 +1,7 @@
 [general]
 name=Geoscopio Search
 qgisMinimumVersion=2.12
-description=desc
+description=A plugin to interact with a web client from Geoscopio (RT) dedicated to search places through its geocoding engine
 version=0.2
 author=Walter lorenzetti (GIS3W)
 email=lorenzetti@gis3w.it
