@@ -6,7 +6,7 @@ version=0.2
 author=Walter lorenzetti (GIS3W)
 email=lorenzetti@gis3w.it
 
-about=This plugin is for Geoscopio (http://www.regione.toscana.it/-/geoscopio) users, the online spatial data catalogue of Regione Toscana (Italy). The plugin will let users search places within a webview of the catalogue, whcih is synced with QGIS's map canvas.
+about=This plugin is for Geoscopio (http://www.regione.toscana.it/-/geoscopio) users, the online spatial data catalogue of Regione Toscana (Italy). The plugin will let users search places within a webview of the catalogue, synced with QGIS's map canvas.
 
 tracker=https://github.com/gis3w/geoscopio_search/issues
 repository=https://github.com/gis3w/geoscopio_search
