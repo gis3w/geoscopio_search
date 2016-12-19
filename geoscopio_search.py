@@ -64,12 +64,13 @@ class GeoscopioSearch:
                 QCoreApplication.installTranslator(self.translator)
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = GeoscopioSearchDialog()
-        self.dlg.resized.connect(self.on_resize_dialog)
+        self.dlg = None     
+        #self.dlg = GeoscopioSearchDialog()
+        #self.dlg.resized.connect(self.on_resize_dialog)
 
         # instance a JSTOQGIS INTERFACE
         self.JSTOQGIS_INTERFACE = JsToQgis_Interface(self.iface)
-        self.dlg.JSTOQGIS_INTERFACE = self.JSTOQGIS_INTERFACE
+        #self.dlg.JSTOQGIS_INTERFACE = self.JSTOQGIS_INTERFACE
 
         # Declare instance attributes
         self.actions = []
@@ -177,6 +178,8 @@ class GeoscopioSearch:
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
+        if self.dlg:
+            self.dlg.close()
         for action in self.actions:
             self.iface.removePluginWebMenu(
                 self.tr(u'&Geoscopio Search'),
@@ -184,18 +187,27 @@ class GeoscopioSearch:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
+        
+            
+    def createDlg(self):
+        self.dlg = GeoscopioSearchDialog()
+        self.dlg.resized.connect(self.on_resize_dialog)
+        self.dlg.JSTOQGIS_INTERFACE = self.JSTOQGIS_INTERFACE
+        
     def run(self):
         """Run method that performs all the real work"""
-
-        url = QUrl(GEOSCOPIO_PAGE_URL)
-        if self.dlg.WEB.url() != url:
-            self.dlg.WEB.loadFinished.connect(self.connect_qgis_js)
-            self.dlg.WEB.setUrl(url)
-            #self.dlg.WEB.load(url)
-
-        # show the dialog
-        self.dlg.show()
+        if not self.dlg:
+            self.createDlg()
+            url = QUrl(GEOSCOPIO_PAGE_URL)
+            if self.dlg.WEB.url() != url:
+                self.dlg.WEB.loadFinished.connect(self.connect_qgis_js)
+                self.dlg.WEB.setUrl(url)
+                #self.dlg.WEB.load(url)
+            # show the dialog
+            self.dlg.show()
+        else:
+            self.dlg.raise_()
+            self.dlg.showNormal()
 
     def connect_qgis_js(self):
         self.dlg.WEB.page().mainFrame().addToJavaScriptWindowObject("JSTOQGIS_INTERFACE", self.JSTOQGIS_INTERFACE)

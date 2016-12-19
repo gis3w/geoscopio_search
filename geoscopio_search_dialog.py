@@ -45,6 +45,7 @@ class GeoscopioSearchDialog(QtGui.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.WEB.setPage(WebPage())
+        self.setWindowFlags(QtCore.Qt.Window)
 
     def resizeEvent(self, event):
         self.resized_ev.emit(1)
